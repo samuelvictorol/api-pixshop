@@ -50,12 +50,22 @@ const productController = {
             }
             // Extrair os parâmetros de página e itens por página da req.query
             const page = parseInt(req.query.page) || 1; // Página padrão é 1 se não for fornecida
-            const itemPerPage = parseInt(req.query.itemPerPage) || 10; // Itens por página padrão é 10 se não for fornecida
+            const rowsPerPage = parseInt(req.query.rowsPerPage) || 10; // Itens por página padrão é 10 se não for fornecida
             // Calcular o número de documentos para pular
-            const skip = (page - 1) * itemPerPage;
+            const skip = (page - 1) * rowsPerPage;
+            const totalElements = await ProductModel.countDocuments();
+            const totalPages = Math.ceil(totalElements / rowsPerPage);
+            const isLastPage = (await ProductModel.countDocuments(filters)) <= (skip + rowsPerPage);
             // Consultar produtos com os filtros e a paginação
-            const products = await ProductModel.find(filters).skip(skip).limit(itemPerPage);
-            res.status(200).send(products);
+            const products = await ProductModel.find(filters).skip(skip).limit(rowsPerPage);
+            const pagination = {
+                page,
+                isLastPage,
+                rowsPerPage,
+                totalElements,
+                totalPages
+            };
+            res.status(200).send({products, pagination});
         } catch (error) {
             res.status(400).send(error);
         }
