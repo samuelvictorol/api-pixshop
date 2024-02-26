@@ -69,6 +69,19 @@ const productController = {
         } catch (error) {
             res.status(400).send(error);
         }
+    },
+    removeProduct: async (req, res) => {
+        const id = req.params.id;
+        if (!id) {
+            res.status(400).send({ success: false, message: errorEnum.DELETE_PRODUCT_FAILED });
+        }
+        await ProductModel.findByIdAndDelete(id)
+            .then(() => {
+                res.status(200).send({ success: true, message: sucessoEnum.DELETE_PRODUCT });
+            })
+            .catch((error) => {
+                res.status(400).send({ success: false, message: errorEnum.DELETE_PRODUCT_FAILED });
+            });
     }
     
 }
